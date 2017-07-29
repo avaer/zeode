@@ -15,14 +15,10 @@ chunk.removeObject(0);
 chunk.forEachObject((n, position) => {
   console.log('got object 1', {n, position});
 });
-z.save((byteOffset, datas) => {
-  for (let i = 0; i < datas.length; i++) {
-    const data = datas[i];
-    const file2 = new Uint32Array(buffer, byteOffset, data.length);
-    file2.set(data);
-    byteOffset += data.length * 4;
-  }
-  fileSize = Math.max(fileSize, byteOffset);
+z.save((byteOffset, data) => {
+  const file2 = new Uint32Array(buffer, byteOffset, data.length);
+  file2.set(data);
+  fileSize = Math.max(fileSize, byteOffset + data.byteLength);
 });
 file = new Uint32Array(buffer, 0, fileSize);
 console.log('got new file size', fileSize);
