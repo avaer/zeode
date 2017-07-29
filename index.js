@@ -101,7 +101,11 @@ class Zeode {
     return this.chunks.find(chunk => chunk.x === x && chunk.y === y) || null;
   }
 
-  addChunk(x, y) {
+  addChunk(x, y, buffer) {
+    this.chunks.push(new Chunk(x, y, buffer));
+  }
+
+  makeChunk(x, y) {
     const chunk = new Chunk(x, y);
     this.chunks.push(chunk);
     return chunk;

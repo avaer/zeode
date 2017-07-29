@@ -6,8 +6,8 @@ let file = new Uint8Array(buffer, 0, fileSize);
 
 let z = zeode();
 z.load(file);
-z.addChunk(0, 0);
-z.addChunk(0, 1);
+z.makeChunk(0, 0);
+z.makeChunk(0, 1);
 let chunk = z.getChunk(0, 1);
 chunk.addObject(100, [1, 2, 3]);
 chunk.addObject(101, [4, 5, 6]);
