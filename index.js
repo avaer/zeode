@@ -112,6 +112,12 @@ class Zeode {
     this.chunks.push(chunk);
     return chunk;
   }
+
+  forEachObject(fn) {
+    for (let i = 0; i < this.chunks.length; i++) {
+      this.chunks[i].forEachObject(fn);
+    }
+  }
 }
 
 const zeode = () => new Zeode();
