@@ -90,7 +90,7 @@ class Zeode {
       const chunk = this.chunks[i];
 
       if (chunk.dirty) {
-        fn(i * CHUNK_SIZE, [Uint32Array.from([chunk.x, chunk.z]), chunk.uint32Buffer]);
+        fn(i * CHUNK_SIZE, [Int32Array.from([chunk.x, chunk.z]), chunk.uint32Buffer]);
 
         chunk.dirty = false;
       }
