@@ -30,7 +30,7 @@ class Chunk {
         localPosition[0] = this.float32Buffer[baseIndex + 1];
         localPosition[1] = this.float32Buffer[baseIndex + 2];
         localPosition[2] = this.float32Buffer[baseIndex + 3];
-        fn(n, localPosition);
+        fn(n, localPosition, i);
       }
     }
   }
