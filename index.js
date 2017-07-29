@@ -6,12 +6,11 @@ const CHUNK_BUFFER_SIZE = CHUNK_SLOTS * CHUNK_SLOT_SIZE;
 const CHUNK_SIZE = CHUNK_HEADER_SIZE + CHUNK_BUFFER_SIZE;
 
 class Chunk {
-  constructor(x = 0, y = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4), index = -1) {
+  constructor(x = 0, y = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4)) {
     this.x = x;
     this.y = y;
     this.uint32Buffer = buffer;
     this.float32Buffer = new Float32Array(buffer.buffer, buffer.byteOffset, buffer.length);
-    this.index = index;
 
     this.dirty = false;
   }
@@ -37,6 +36,7 @@ class Chunk {
     for (let i = 0; i < CHUNK_SLOTS; i++) {
       if (this.uint32Buffer[i * SLOT_FIELDS] === 0) {
         freeIndex = i;
+        break;
       }
     }
 
