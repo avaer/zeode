@@ -15,6 +15,10 @@ class Chunk {
     this.dirty = false;
   }
 
+  getBuffer() {
+    return this.uint32Buffer;
+  }
+
   forEachObject(fn) {
     const localPosition = Array(3);
 
