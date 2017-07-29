@@ -102,7 +102,9 @@ class Zeode {
   }
 
   addChunk(x, y, buffer) {
-    this.chunks.push(new Chunk(x, y, buffer));
+    const chunk = new Chunk(x, y, buffer);
+    this.chunks.push(chunk);
+    return chunk;
   }
 
   makeChunk(x, y) {
