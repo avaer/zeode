@@ -6,9 +6,9 @@ const CHUNK_BUFFER_SIZE = CHUNK_SLOTS * CHUNK_SLOT_SIZE;
 const CHUNK_SIZE = CHUNK_HEADER_SIZE + CHUNK_BUFFER_SIZE;
 
 class Chunk {
-  constructor(x = 0, y = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4)) {
+  constructor(x = 0, z = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4)) {
     this.x = x;
-    this.y = y;
+    this.z = z;
     this.uint32Buffer = buffer;
     this.float32Buffer = new Float32Array(buffer.buffer, buffer.byteOffset, buffer.length);
 
@@ -78,9 +78,9 @@ class Zeode {
     for (let i = 0; i < numChunks; i ++) {
       const chunkHeader = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE, 2);
       const x = chunkHeader[0];
-      const y = chunkHeader[1];
+      const z = chunkHeader[1];
       const chunkBuffer = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE + 2*4, CHUNK_BUFFER_SIZE/4);
-      const chunk = new Chunk(x, y, chunkBuffer, i);
+      const chunk = new Chunk(x, z, chunkBuffer, i);
       this.chunks.push(chunk);
     }
   }
@@ -90,25 +90,25 @@ class Zeode {
       const chunk = this.chunks[i];
 
       if (chunk.dirty) {
-        fn(i * CHUNK_SIZE, [Uint32Array.from([chunk.x, chunk.y]), chunk.uint32Buffer]);
+        fn(i * CHUNK_SIZE, [Uint32Array.from([chunk.x, chunk.z]), chunk.uint32Buffer]);
 
         chunk.dirty = false;
       }
     }
   }
 
-  getChunk(x, y) {
-    return this.chunks.find(chunk => chunk.x === x && chunk.y === y) || null;
+  getChunk(x, z) {
+    return this.chunks.find(chunk => chunk.x === x && chunk.z === z) || null;
   }
 
-  addChunk(x, y, buffer) {
-    const chunk = new Chunk(x, y, buffer);
+  addChunk(x, z, buffer) {
+    const chunk = new Chunk(x, z, buffer);
     this.chunks.push(chunk);
     return chunk;
   }
 
-  makeChunk(x, y) {
-    const chunk = new Chunk(x, y);
+  makeChunk(x, z) {
+    const chunk = new Chunk(x, z);
     this.chunks.push(chunk);
     return chunk;
   }
