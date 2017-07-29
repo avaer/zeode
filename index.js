@@ -76,10 +76,10 @@ class Zeode {
   load(buffer) {
     const numChunks = buffer.length / CHUNK_SIZE;
     for (let i = 0; i < numChunks; i ++) {
-      const chunkHeader = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE, 2);
+      const chunkHeader = new Int32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE, 2);
       const x = chunkHeader[0];
       const z = chunkHeader[1];
-      const chunkBuffer = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE + 2*4, CHUNK_BUFFER_SIZE/4);
+      const chunkBuffer = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE + chunkHeader.byteLength, CHUNK_BUFFER_SIZE/4);
       const chunk = new Chunk(x, z, chunkBuffer, i);
       this.chunks.push(chunk);
     }
