@@ -128,13 +128,15 @@ class Zeode {
 
       if (chunk.dirty) {
         fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
-        byteOffset += 2 * 4;
+        byteOffset += CHUNK_HEADER_SIZE;
         fn(byteOffset, chunk.uint32Buffer);
         byteOffset += CHUNK_BUFFER_SIZE;
         fn(byteOffset, chunk.trailerBuffer);
         byteOffset += CHUNK_TRAILER_SIZE;
 
         chunk.dirty = false;
+      } else {
+        byteOffset += CHUNK_SIZE;
       }
     }
   }
