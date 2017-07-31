@@ -15,6 +15,12 @@ chunk.removeObject(0);
 chunk.forEachObject((n, matrix) => {
   console.log('got object 1', {n, matrix});
 });
+
+chunk.addTrailer(1);
+chunk.addTrailer(2);
+chunk.removeTrailer(0);
+console.log('got trailer 1', chunk.hasTrailer(1), chunk.hasTrailer(2), chunk.hasTrailer(3));
+
 z.save((byteOffset, data) => {
   const file2 = new Uint32Array(buffer, byteOffset, data.length);
   file2.set(data);
@@ -29,3 +35,5 @@ chunk = z.getChunk(0, 1);
 chunk.forEachObject((n, matrix) => {
   console.log('got object 2', {n, matrix});
 });
+
+console.log('got trailer 2', chunk.hasTrailer(1), chunk.hasTrailer(2), chunk.hasTrailer(3));

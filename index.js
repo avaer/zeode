@@ -3,14 +3,17 @@ const SLOT_FIELDS = 1 + 10;
 const CHUNK_SLOT_SIZE = SLOT_FIELDS * 4;
 const CHUNK_HEADER_SIZE = 2 * 4;
 const CHUNK_BUFFER_SIZE = CHUNK_SLOTS * CHUNK_SLOT_SIZE;
-const CHUNK_SIZE = CHUNK_HEADER_SIZE + CHUNK_BUFFER_SIZE;
+const TRAILER_SLOTS = 32;
+const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
+const CHUNK_SIZE = CHUNK_HEADER_SIZE + CHUNK_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
 
 class Chunk {
-  constructor(x = 0, z = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4)) {
+  constructor(x = 0, z = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4), trailer = new Uint32Array(CHUNK_TRAILER_SIZE / 4)) {
     this.x = x;
     this.z = z;
     this.uint32Buffer = buffer;
     this.float32Buffer = new Float32Array(buffer.buffer, buffer.byteOffset, buffer.length);
+    this.trailerBuffer = trailer;
 
     this.dirty = false;
   }
@@ -66,6 +69,32 @@ class Chunk {
 
     this.dirty = true;
   }
+
+  addTrailer(n) {
+    let freeIndex = -1;
+    for (let i = 0; i < TRAILER_SLOTS; i++) {
+      if (this.trailerBuffer[i] === 0) {
+        freeIndex = i;
+        break;
+      }
+    }
+
+    if (freeIndex !== -1) {
+      this.trailerBuffer[freeIndex] = n;
+
+      this.dirty = true;
+    }
+
+    return freeIndex;
+  }
+
+  removeTrailer(index) {
+    this.trailerBuffer[index] = 0;
+  }
+
+  hasTrailer(n) {
+    return this.trailerBuffer.includes(n);
+  }
 }
 
 class Zeode {
@@ -75,23 +104,35 @@ class Zeode {
 
   load(buffer) {
     const numChunks = buffer.length / CHUNK_SIZE;
+    let {byteOffset} = buffer;
     for (let i = 0; i < numChunks; i ++) {
-      const chunkHeader = new Int32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE, 2);
+      const chunkHeader = new Int32Array(buffer.buffer, byteOffset, 2);
       const x = chunkHeader[0];
       const z = chunkHeader[1];
-      const chunkBuffer = new Uint32Array(buffer.buffer, buffer.byteOffset + i*CHUNK_SIZE + chunkHeader.byteLength, CHUNK_BUFFER_SIZE/4);
-      const chunk = new Chunk(x, z, chunkBuffer, i);
+      byteOffset += 2 * 4;
+      const chunkBuffer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_BUFFER_SIZE/4);
+      byteOffset += CHUNK_BUFFER_SIZE;
+      const chunkTrailer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_TRAILER_SIZE/4);
+      byteOffset += CHUNK_TRAILER_SIZE;
+
+      const chunk = new Chunk(x, z, chunkBuffer, chunkTrailer);
       this.chunks.push(chunk);
     }
   }
 
   save(fn) {
+    let byteOffset = 0;
+
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i];
 
       if (chunk.dirty) {
-        fn(i*CHUNK_SIZE, Int32Array.from([chunk.x, chunk.z]));
-        fn(i*CHUNK_SIZE + 2*4, chunk.uint32Buffer);
+        fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
+        byteOffset += 2 * 4;
+        fn(byteOffset, chunk.uint32Buffer);
+        byteOffset += CHUNK_BUFFER_SIZE;
+        fn(byteOffset, chunk.trailerBuffer);
+        byteOffset += CHUNK_TRAILER_SIZE;
 
         chunk.dirty = false;
       }
