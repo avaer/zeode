@@ -1,5 +1,5 @@
 const CHUNK_SLOTS = 64 * 64;
-const SLOT_FIELDS = 1 + 3;
+const SLOT_FIELDS = 1 + 10;
 const CHUNK_SLOT_SIZE = SLOT_FIELDS * 4;
 const CHUNK_HEADER_SIZE = 2 * 4;
 const CHUNK_BUFFER_SIZE = CHUNK_SLOTS * CHUNK_SLOT_SIZE;
@@ -20,22 +20,22 @@ class Chunk {
   }
 
   forEachObject(fn) {
-    const localPosition = Array(3);
+    const localMatrix = Array(10);
 
     for (let i = 0; i < CHUNK_SLOTS; i++) {
       const baseIndex = i * SLOT_FIELDS;
       const n = this.uint32Buffer[baseIndex];
 
       if (n !== 0) {
-        localPosition[0] = this.float32Buffer[baseIndex + 1];
-        localPosition[1] = this.float32Buffer[baseIndex + 2];
-        localPosition[2] = this.float32Buffer[baseIndex + 3];
-        fn(n, localPosition, i);
+        for (let i = 0; i < 10; i++) {
+          localMatrix[i] = this.float32Buffer[baseIndex + 1 + i];
+        }
+        fn(n, localMatrix, i);
       }
     }
   }
 
-  addObject(n, position) {
+  addObject(n, matrix) {
     let freeIndex = -1;
     for (let i = 0; i < CHUNK_SLOTS; i++) {
       if (this.uint32Buffer[i * SLOT_FIELDS] === 0) {
@@ -47,9 +47,9 @@ class Chunk {
     if (freeIndex !== -1) {
       const baseIndex = freeIndex * SLOT_FIELDS;
       this.uint32Buffer[baseIndex + 0] = n;
-      this.float32Buffer[baseIndex + 1] = position[0];
-      this.float32Buffer[baseIndex + 2] = position[1];
-      this.float32Buffer[baseIndex + 3] = position[2];
+      for (let i = 0; i < 10; i++) {
+        this.float32Buffer[baseIndex + 1 + i] = matrix[i];
+      }
 
       this.dirty = true;
     }
@@ -60,9 +60,9 @@ class Chunk {
   removeObject(index) {
     const baseIndex = index * SLOT_FIELDS;
     this.uint32Buffer[baseIndex + 0] = 0;
-    this.float32Buffer[baseIndex + 1] = 0;
-    this.float32Buffer[baseIndex + 2] = 0;
-    this.float32Buffer[baseIndex + 3] = 0;
+    for (let i = 0; i < 10; i++) {
+      this.float32Buffer[baseIndex + 1 + i] = 0;
+    }
 
     this.dirty = true;
   }
