@@ -70,6 +70,21 @@ class Chunk {
     this.dirty = true;
   }
 
+  getObject(index) {
+    const baseIndex = index * SLOT_FIELDS;
+    const n = this.uint32Buffer[baseIndex];
+
+    if (n !== 0) {
+      const matrix = Array(10);
+      for (let i = 0; i < 10; i++) {
+        matrix[i] = this.float32Buffer[baseIndex + 1 + i];
+      }
+      return [n, matrix, index];
+    } else {
+      return null;
+    }
+  }
+
   addTrailer(n) {
     let freeIndex = -1;
     for (let i = 0; i < TRAILER_SLOTS; i++) {

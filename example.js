@@ -12,8 +12,9 @@ let chunk = z.getChunk(0, 1);
 chunk.addObject(100, [1, 2, 3, 0, 0, 0, 1, 1, 1, 1]);
 chunk.addObject(101, [4, 5, 6, 0, 0, 0, 1, 1, 1, 1]);
 chunk.removeObject(0);
+console.log('got object 1', chunk.getObject(1));
 chunk.forEachObject((n, matrix) => {
-  console.log('got object 1', {n, matrix});
+  console.log('got object 2', {n, matrix});
 });
 
 chunk.addTrailer(1);
@@ -32,8 +33,9 @@ console.log('got new file size', fileSize);
 z = zeode();
 z.load(file);
 chunk = z.getChunk(0, 1);
+console.log('got object 3', chunk.getObject(1));
 chunk.forEachObject((n, matrix) => {
-  console.log('got object 2', {n, matrix});
+  console.log('got object 4', {n, matrix});
 });
 
 console.log('got trailer 2', chunk.hasTrailer(1), chunk.hasTrailer(2), chunk.hasTrailer(3));
