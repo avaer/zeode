@@ -1,5 +1,7 @@
 const zeode = require('.');
 
+const _parseObject = ([n, localMatrix, value, index]) => ({n, localMatrix, value, index});
+
 const buffer = new ArrayBuffer(10 * 1024 * 1024);
 let fileSize = 0;
 let file = new Uint8Array(buffer, 0, fileSize);
@@ -9,12 +11,12 @@ z.load(file);
 z.makeChunk(0, 0);
 z.makeChunk(0, 1);
 let chunk = z.getChunk(0, 1);
-chunk.addObject(100, [1, 2, 3, 0, 0, 0, 1, 1, 1, 1]);
-chunk.addObject(101, [4, 5, 6, 0, 0, 0, 1, 1, 1, 1]);
+chunk.addObject(100, [1, 2, 3, 0, 0, 0, 1, 1, 1, 1], 1);
+chunk.addObject(101, [4, 5, 6, 0, 0, 0, 1, 1, 1, 1], 2);
 chunk.removeObject(0);
-console.log('got object 1', chunk.getObject(1));
-chunk.forEachObject((n, matrix) => {
-  console.log('got object 2', {n, matrix});
+console.log('got object 1', _parseObject(chunk.getObject(1)));
+chunk.forEachObject((n, matrix, value, index) => {
+  console.log('got object 2', {n, matrix, value, index});
 });
 
 chunk.addTrailer(1);
@@ -33,9 +35,9 @@ console.log('got new file size', fileSize);
 z = zeode();
 z.load(file);
 chunk = z.getChunk(0, 1);
-console.log('got object 3', chunk.getObject(1));
-chunk.forEachObject((n, matrix) => {
-  console.log('got object 4', {n, matrix});
+console.log('got object 3', _parseObject(chunk.getObject(1)));
+chunk.forEachObject((n, matrix, value, index) => {
+  console.log('got object 4', {n, matrix, value, index});
 });
 
 console.log('got trailer 2', chunk.hasTrailer(1), chunk.hasTrailer(2), chunk.hasTrailer(3));

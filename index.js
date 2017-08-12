@@ -1,11 +1,13 @@
 const CHUNK_SLOTS = 64 * 64;
-const SLOT_FIELDS = 1 + 10;
+const SLOT_FIELDS = 1 + 10 + 1;
 const CHUNK_SLOT_SIZE = SLOT_FIELDS * 4;
 const CHUNK_HEADER_SIZE = 2 * 4;
 const CHUNK_BUFFER_SIZE = CHUNK_SLOTS * CHUNK_SLOT_SIZE;
 const TRAILER_SLOTS = 32;
 const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
 const CHUNK_SIZE = CHUNK_HEADER_SIZE + CHUNK_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
+
+const localMatrix = Array(10);
 
 class Chunk {
   constructor(x = 0, z = 0, buffer = new Uint32Array(CHUNK_BUFFER_SIZE / 4), trailer = new Uint32Array(CHUNK_TRAILER_SIZE / 4)) {
@@ -23,22 +25,25 @@ class Chunk {
   }
 
   forEachObject(fn) {
-    const localMatrix = Array(10);
-
     for (let i = 0; i < CHUNK_SLOTS; i++) {
-      const baseIndex = i * SLOT_FIELDS;
-      const n = this.uint32Buffer[baseIndex];
+      let offset = i * SLOT_FIELDS;
+      const n = this.uint32Buffer[offset];
 
       if (n !== 0) {
+        offset++;
         for (let i = 0; i < 10; i++) {
-          localMatrix[i] = this.float32Buffer[baseIndex + 1 + i];
+          localMatrix[i] = this.float32Buffer[offset];
+          offset++;
         }
-        fn(n, localMatrix, i);
+        const value = this.uint32Buffer[offset];
+        offset++;
+
+        fn(n, localMatrix, value, i);
       }
     }
   }
 
-  addObject(n, matrix) {
+  addObject(n, matrix, value) {
     let freeIndex = -1;
     for (let i = 0; i < CHUNK_SLOTS; i++) {
       if (this.uint32Buffer[i * SLOT_FIELDS] === 0) {
@@ -48,11 +53,15 @@ class Chunk {
     }
 
     if (freeIndex !== -1) {
-      const baseIndex = freeIndex * SLOT_FIELDS;
-      this.uint32Buffer[baseIndex + 0] = n;
+      let offset = freeIndex * SLOT_FIELDS;
+      this.uint32Buffer[offset] = n;
+      offset++;
       for (let i = 0; i < 10; i++) {
-        this.float32Buffer[baseIndex + 1 + i] = matrix[i];
+        this.float32Buffer[offset] = matrix[i];
+        offset++;
       }
+      this.uint32Buffer[offset] = value;
+      offset++;
 
       this.dirty = true;
     }
@@ -61,25 +70,32 @@ class Chunk {
   }
 
   removeObject(index) {
-    const baseIndex = index * SLOT_FIELDS;
-    this.uint32Buffer[baseIndex + 0] = 0;
+    let offset = index * SLOT_FIELDS;
+    this.uint32Buffer[offset] = 0;
+    offset++;
     for (let i = 0; i < 10; i++) {
-      this.float32Buffer[baseIndex + 1 + i] = 0;
+      this.float32Buffer[offset] = 0;
+      offset++;
     }
+    this.uint32Buffer[offset] = 0;
+    offset++;
 
     this.dirty = true;
   }
 
   getObject(index) {
-    const baseIndex = index * SLOT_FIELDS;
-    const n = this.uint32Buffer[baseIndex];
+    let offset = index * SLOT_FIELDS;
+    const n = this.uint32Buffer[offset];
 
     if (n !== 0) {
-      const matrix = Array(10);
+      offset++;
       for (let i = 0; i < 10; i++) {
-        matrix[i] = this.float32Buffer[baseIndex + 1 + i];
+        localMatrix[i] = this.float32Buffer[offset];
+        offset++;
       }
-      return [n, matrix, index];
+      const value = this.uint32Buffer[offset];
+
+      return [n, localMatrix, value, index];
     } else {
       return null;
     }
