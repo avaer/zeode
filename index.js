@@ -83,6 +83,12 @@ class Chunk {
     this.dirty = true;
   }
 
+  setObjectData(index, value) {
+    this.uint32Buffer[(index * SLOT_FIELDS) + (1 + 10)] = value;
+
+    this.dirty = true;
+  }
+
   getObject(index) {
     let offset = index * SLOT_FIELDS;
     const n = this.uint32Buffer[offset];

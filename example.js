@@ -14,6 +14,7 @@ let chunk = z.getChunk(0, 1);
 chunk.addObject(100, [1, 2, 3, 0, 0, 0, 1, 1, 1, 1], 1);
 chunk.addObject(101, [4, 5, 6, 0, 0, 0, 1, 1, 1, 1], 2);
 chunk.removeObject(0);
+chunk.setObjectData(1, 7);
 console.log('got object 1', _parseObject(chunk.getObject(1)));
 chunk.forEachObject((n, matrix, value, index) => {
   console.log('got object 2', {n, matrix, value, index});
