@@ -41,4 +41,11 @@ chunk.forEachObject((n, matrix, value, index) => {
   console.log('got object 4', {n, matrix, value, index});
 });
 
+z.removeChunk(0, 0);
+chunk = z.getChunk(0, 1);
+console.log('got object 5', _parseObject(chunk.getObject(1)));
+chunk.forEachObject((n, matrix, value, index) => {
+  console.log('got object 6', {n, matrix, value, index});
+});
+
 console.log('got trailer 2', chunk.hasTrailer(1), chunk.hasTrailer(2), chunk.hasTrailer(3));

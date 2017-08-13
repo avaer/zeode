@@ -188,6 +188,10 @@ class Zeode {
     return chunk;
   }
 
+  removeChunk(x, z) {
+    this.chunks.splice(this.chunks.findIndex(chunk => chunk.x === x && chunk.z === z), 1);
+  }
+
   makeChunk(x, z) {
     const chunk = new Chunk(x, z);
     this.chunks.push(chunk);
