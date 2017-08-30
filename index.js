@@ -227,6 +227,7 @@ class Zeode {
 }
 
 const zeode = () => new Zeode();
+zeode.Chunk = Chunk;
 zeode.OBJECT_BUFFER_SIZE = OBJECT_BUFFER_SIZE;
 zeode.GEOMETRY_BUFFER_SIZE = GEOMETRY_BUFFER_SIZE;
 
