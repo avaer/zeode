@@ -89,6 +89,9 @@ class Chunk {
 
   removeObject(index) {
     let offset = index * OBJECT_SLOT_FIELDS;
+
+    const oldN = this.uint32Buffer[offset];
+
     this.uint32Buffer[offset] = 0;
     offset++;
     for (let i = 0; i < 10; i++) {
@@ -99,6 +102,8 @@ class Chunk {
     offset++;
 
     this.dirty = true;
+
+    return oldN;
   }
 
   setObjectData(index, value) {
