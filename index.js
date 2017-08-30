@@ -219,6 +219,10 @@ class Zeode {
     return chunk;
   }
 
+  pushChunk(chunk) {
+    this.chunks.push(chunk);
+  }
+
   forEachObject(fn) {
     for (let i = 0; i < this.chunks.length; i++) {
       this.chunks[i].forEachObject(fn);
