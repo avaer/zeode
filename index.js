@@ -36,6 +36,22 @@ class Chunk {
     return this.geometryBuffer;
   }
 
+  getObjectN(i) {
+    return this.uint32Buffer[i * OBJECT_SLOT_FIELDS];
+  }
+
+  getObjectMatrix(i) {
+    let offset = i * OBJECT_SLOT_FIELDS;
+    offset++;
+
+    for (let j = 0; j < 10; j++) {
+      localMatrix[j] = this.float32Buffer[offset];
+      offset++;
+    }
+
+    return localMatrix;
+  }
+
   forEachObject(fn) {
     let offset = 0;
     for (let i = 0; i < OBJECT_SLOTS; i++) {
