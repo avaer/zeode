@@ -3,6 +3,7 @@ const OBJECT_SLOTS = 64 * 64;
 const OBJECT_SLOT_FIELDS = 1 + 10 + 1;
 const OBJECT_SLOT_SIZE = OBJECT_SLOT_FIELDS * 4;
 const OBJECT_BUFFER_SIZE = OBJECT_SLOTS * OBJECT_SLOT_SIZE;
+const BLOCK_BUFFER_SIZE = 16 * 128 * 16 * 4;
 const GEOMETRY_BUFFER_SIZE = 1 * 1024 * 1024;
 const TRAILER_SLOTS = 32;
 const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
@@ -15,6 +16,7 @@ class Chunk {
     x = 0,
     z = 0,
     objectBuffer = new Uint32Array(OBJECT_BUFFER_SIZE / 4),
+    blockBuffer = new Uint32Array(BLOCK_BUFFER_SIZE / 4),
     geometryBuffer = new Uint8Array(GEOMETRY_BUFFER_SIZE),
     trailerBuffer = new Uint32Array(CHUNK_TRAILER_SIZE / 4)
   ) {
@@ -22,6 +24,7 @@ class Chunk {
     this.z = z;
     this.uint32Buffer = objectBuffer;
     this.float32Buffer = new Float32Array(objectBuffer.buffer, objectBuffer.byteOffset, objectBuffer.length);
+    this.blockBuffer = blockBuffer;
     this.geometryBuffer = geometryBuffer;
     this.trailerBuffer = trailerBuffer;
 
@@ -30,6 +33,10 @@ class Chunk {
 
   getObjectBuffer() {
     return this.uint32Buffer;
+  }
+
+  getBlockBuffer() {
+    return this.blockBuffer;
   }
 
   getGeometryBuffer() {
@@ -146,6 +153,14 @@ class Chunk {
     }
   }
 
+  setBlock(x, y, z, n) {
+    this.blockBuffer[_getBlockIndex(x, y, z)] = n;
+  }
+
+  clearBlock(x, y, z) {
+    this.blockBuffer[_getBlockIndex(x, y, z)] = 0;
+  }
+
   addTrailer(n) {
     let freeIndex = -1;
     for (let i = 0; i < TRAILER_SLOTS; i++) {
@@ -188,12 +203,14 @@ class Zeode {
       byteOffset += 2 * 4;
       const objectBuffer = new Uint32Array(buffer.buffer, byteOffset, OBJECT_BUFFER_SIZE / 4);
       byteOffset += OBJECT_BUFFER_SIZE;
+      const blockBuffer = new Uint32Array(buffer.buffer, byteOffset, BLOCK_BUFFER_SIZE / 4);
+      byteOffset += BLOCK_BUFFER_SIZE;
       const geometryBuffer = new Uint8Array(buffer.buffer, byteOffset, GEOMETRY_BUFFER_SIZE);
       byteOffset += GEOMETRY_BUFFER_SIZE;
       const chunkTrailer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_TRAILER_SIZE / 4);
       byteOffset += CHUNK_TRAILER_SIZE;
 
-      this.chunks.push(new Chunk(x, z, objectBuffer, geometryBuffer, chunkTrailer));
+      this.chunks.push(new Chunk(x, z, objectBuffer, blockBuffer, geometryBuffer, chunkTrailer));
     }
   }
 
@@ -207,6 +224,8 @@ class Zeode {
         fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
         byteOffset += CHUNK_HEADER_SIZE;
         fn(byteOffset, chunk.uint32Buffer);
+        byteOffset += BLOCK_BUFFER_SIZE;
+        fn(byteOffset, chunk.blockBuffer);
         byteOffset += OBJECT_BUFFER_SIZE;
         fn(byteOffset, chunk.geometryBuffer);
         byteOffset += GEOMETRY_BUFFER_SIZE;
@@ -251,9 +270,16 @@ class Zeode {
   }
 }
 
+const _getBlockIndex = (x, y, z) => {
+  const ay = Math.floor(y / 16);
+  y = y - ay * 16;
+  return (ay * (BLOCK_BUFFER_SIZE / 4 / (128 / 16))) + x + y * 16 + z * 16 * 16;
+};
+
 const zeode = () => new Zeode();
 zeode.Chunk = Chunk;
 zeode.OBJECT_BUFFER_SIZE = OBJECT_BUFFER_SIZE;
+zeode.BLOCK_BUFFER_SIZE = BLOCK_BUFFER_SIZE;
 zeode.GEOMETRY_BUFFER_SIZE = GEOMETRY_BUFFER_SIZE;
 
 module.exports = zeode;
