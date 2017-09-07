@@ -7,7 +7,7 @@ const BLOCK_BUFFER_SIZE = 16 * 128 * 16 * 4;
 const GEOMETRY_BUFFER_SIZE = 1 * 1024 * 1024;
 const TRAILER_SLOTS = 32;
 const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
-const CHUNK_SIZE = CHUNK_HEADER_SIZE + OBJECT_BUFFER_SIZE + GEOMETRY_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
+const CHUNK_SIZE = CHUNK_HEADER_SIZE + BLOCK_BUFFER_SIZE + OBJECT_BUFFER_SIZE + GEOMETRY_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
 
 const localMatrix = Array(10);
 
@@ -196,7 +196,7 @@ class Zeode {
   load(buffer) {
     const numChunks = buffer.length / CHUNK_SIZE;
     let {byteOffset} = buffer;
-    for (let i = 0; i < numChunks; i ++) {
+    for (let i = 0; i < numChunks; i++) {
       const chunkHeader = new Int32Array(buffer.buffer, byteOffset, 2);
       const x = chunkHeader[0];
       const z = chunkHeader[1];
