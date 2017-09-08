@@ -153,6 +153,10 @@ class Chunk {
     }
   }
 
+  getBlock(x, y, z, n) {
+    return this.blockBuffer[_getBlockIndex(x, y, z)];
+  }
+
   setBlock(x, y, z, n) {
     this.blockBuffer[_getBlockIndex(x, y, z)] = n;
   }
