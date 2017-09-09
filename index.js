@@ -153,7 +153,7 @@ class Chunk {
     }
   }
 
-  getBlock(x, y, z, n) {
+  getBlock(x, y, z) {
     return this.blockBuffer[_getBlockIndex(x, y, z)];
   }
 
