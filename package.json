@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/modulesio/zeode/issues"
   },
-  "homepage": "https://github.com/modulesio/zeode#readme"
+  "homepage": "https://github.com/modulesio/zeode#readme",
+  "dependencies": {
+    "mod-loop": "0.0.2"
+  }
 }

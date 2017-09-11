@@ -1,3 +1,5 @@
+const mod = require('mod-loop');
+
 const CHUNK_HEADER_SIZE = 2 * 4;
 const OBJECT_SLOTS = 64 * 64;
 const OBJECT_SLOT_FIELDS = 1 + 10 + 1;
@@ -10,6 +12,8 @@ const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
 const CHUNK_SIZE = CHUNK_HEADER_SIZE + BLOCK_BUFFER_SIZE + OBJECT_BUFFER_SIZE + GEOMETRY_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
 
 const localMatrix = Array(10);
+
+const _getChunkIndex = (x, z) => mod(x, 65536) | mod(z, 65536) << 16;
 
 class Chunk {
   constructor(
@@ -194,7 +198,7 @@ class Chunk {
 
 class Zeode {
   constructor() {
-    this.chunks = [];
+    this.chunks = {};
   }
 
   load(buffer) {
@@ -214,62 +218,70 @@ class Zeode {
       const chunkTrailer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_TRAILER_SIZE / 4);
       byteOffset += CHUNK_TRAILER_SIZE;
 
-      this.chunks.push(new Chunk(x, z, objectBuffer, blockBuffer, geometryBuffer, chunkTrailer));
+      this.chunks[_getChunkIndex(x, z)] = new Chunk(x, z, objectBuffer, blockBuffer, geometryBuffer, chunkTrailer);
     }
   }
 
   save(fn) {
     let byteOffset = 0;
 
-    for (let i = 0; i < this.chunks.length; i++) {
-      const chunk = this.chunks[i];
+    for (const index in this.chunks) {
+      const chunk = this.chunks[index];
 
-      if (chunk.dirty) {
-        fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
-        byteOffset += CHUNK_HEADER_SIZE;
-        fn(byteOffset, chunk.uint32Buffer);
-        byteOffset += BLOCK_BUFFER_SIZE;
-        fn(byteOffset, chunk.blockBuffer);
-        byteOffset += OBJECT_BUFFER_SIZE;
-        fn(byteOffset, chunk.geometryBuffer);
-        byteOffset += GEOMETRY_BUFFER_SIZE;
-        fn(byteOffset, chunk.trailerBuffer);
-        byteOffset += CHUNK_TRAILER_SIZE;
+      if (chunk) {
+        if (chunk.dirty) {
+          fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
+          byteOffset += CHUNK_HEADER_SIZE;
+          fn(byteOffset, chunk.uint32Buffer);
+          byteOffset += BLOCK_BUFFER_SIZE;
+          fn(byteOffset, chunk.blockBuffer);
+          byteOffset += OBJECT_BUFFER_SIZE;
+          fn(byteOffset, chunk.geometryBuffer);
+          byteOffset += GEOMETRY_BUFFER_SIZE;
+          fn(byteOffset, chunk.trailerBuffer);
+          byteOffset += CHUNK_TRAILER_SIZE;
 
-        chunk.dirty = false;
-      } else {
-        byteOffset += CHUNK_SIZE;
+          chunk.dirty = false;
+        } else {
+          byteOffset += CHUNK_SIZE;
+        }
       }
     }
   }
 
   getChunk(x, z) {
-    return this.chunks.find(chunk => chunk.x === x && chunk.z === z) || null;
+    return this.chunks[_getChunkIndex(x, z)];
   }
 
   addChunk(x, z, objectBuffer, geometryBuffer) {
     const chunk = new Chunk(x, z, objectBuffer, geometryBuffer);
-    this.chunks.push(chunk);
+    this.chunks[_getChunkIndex(x, z)] = chunk;
     return chunk;
   }
 
   removeChunk(x, z) {
-    return this.chunks.splice(this.chunks.findIndex(chunk => chunk.x === x && chunk.z === z), 1)[0];
+    const index = _getChunkIndex(x, z);
+    const oldChunk = this.chunks[index];
+    this.chunks[index] = null;
+    return oldChunk;
   }
 
   makeChunk(x, z) {
     const chunk = new Chunk(x, z);
-    this.chunks.push(chunk);
+    this.chunks[_getChunkIndex(x, z)] = chunk;
     return chunk;
   }
 
   pushChunk(chunk) {
-    this.chunks.push(chunk);
+    this.chunks[_getChunkIndex(chunk.x, chunk.z)] = chunk;
   }
 
   forEachObject(fn) {
-    for (let i = 0; i < this.chunks.length; i++) {
-      this.chunks[i].forEachObject(fn);
+    for (const index in this.chunks) {
+      const chunk = this.chunks[index];
+      if (chunk) {
+        chunk.forEachObject(fn);
+      }
     }
   }
 }
