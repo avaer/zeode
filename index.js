@@ -23,13 +23,30 @@ class Chunk {
   constructor(
     x = 0,
     z = 0,
-    terrainBuffer = new Uint32Array(TERRAIN_BUFFER_SIZE / 4),
-    objectBuffer = new Uint32Array(OBJECT_BUFFER_SIZE / 4),
-    blockBuffer = new Uint32Array(BLOCK_BUFFER_SIZE / 4),
-    lightBuffer = new Float32Array(LIGHT_BUFFER_SIZE / 4),
-    geometryBuffer = new Uint8Array(GEOMETRY_BUFFER_SIZE),
-    trailerBuffer = new Uint32Array(CHUNK_TRAILER_SIZE / 4)
+    terrainBuffer,
+    objectBuffer,
+    blockBuffer,
+    lightBuffer,
+    geometryBuffer,
+    trailerBuffer
   ) {
+    if (!terrainBuffer || !objectBuffer || !blockBuffer || !lightBuffer || !geometryBuffer || !trailerBuffer) {
+      const buffer = new ArrayBuffer(TERRAIN_BUFFER_SIZE + OBJECT_BUFFER_SIZE + BLOCK_BUFFER_SIZE + LIGHT_BUFFER_SIZE + GEOMETRY_BUFFER_SIZE + CHUNK_TRAILER_SIZE);
+      let index = 0;
+      terrainBuffer = new Uint32Array(buffer, index, TERRAIN_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+      index += TERRAIN_BUFFER_SIZE;
+      objectBuffer = new Uint32Array(buffer, index, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+      index += OBJECT_BUFFER_SIZE;
+      blockBuffer = new Uint32Array(buffer, index, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+      index += BLOCK_BUFFER_SIZE;
+      lightBuffer = new Float32Array(buffer, index, LIGHT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+      index += LIGHT_BUFFER_SIZE;
+      geometryBuffer = new Uint8Array(buffer, index, GEOMETRY_BUFFER_SIZE / Uint8Array.BYTES_PER_ELEMENT);
+      index += GEOMETRY_BUFFER_SIZE;
+      trailerBuffer = new Float32Array(buffer, index, CHUNK_TRAILER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+      index += CHUNK_TRAILER_SIZE;
+    }
+
     this.x = x;
     this.z = z;
     this.terrainBuffer = terrainBuffer;
