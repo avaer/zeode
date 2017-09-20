@@ -31,20 +31,39 @@ class Chunk {
     trailerBuffer
   ) {
     if (!terrainBuffer || !objectBuffer || !blockBuffer || !lightBuffer || !geometryBuffer || !trailerBuffer) {
-      const buffer = new ArrayBuffer(TERRAIN_BUFFER_SIZE + OBJECT_BUFFER_SIZE + BLOCK_BUFFER_SIZE + LIGHT_BUFFER_SIZE + GEOMETRY_BUFFER_SIZE + CHUNK_TRAILER_SIZE);
+      const buffer = new ArrayBuffer(
+        (!terrainBuffer ? TERRAIN_BUFFER_SIZE : 0)+
+        (!objectBuffer ? OBJECT_BUFFER_SIZE : 0) +
+        (!blockBuffer ? BLOCK_BUFFER_SIZE : 0) +
+        (!lightBuffer ? LIGHT_BUFFER_SIZE : 0) +
+        (!geometryBuffer ? GEOMETRY_BUFFER_SIZE : 0) +
+        (!trailerBuffer ? CHUNK_TRAILER_SIZE : 0)
+      );
       let index = 0;
-      terrainBuffer = new Uint32Array(buffer, index, TERRAIN_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-      index += TERRAIN_BUFFER_SIZE;
-      objectBuffer = new Uint32Array(buffer, index, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-      index += OBJECT_BUFFER_SIZE;
-      blockBuffer = new Uint32Array(buffer, index, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-      index += BLOCK_BUFFER_SIZE;
-      lightBuffer = new Float32Array(buffer, index, LIGHT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-      index += LIGHT_BUFFER_SIZE;
-      geometryBuffer = new Uint8Array(buffer, index, GEOMETRY_BUFFER_SIZE / Uint8Array.BYTES_PER_ELEMENT);
-      index += GEOMETRY_BUFFER_SIZE;
-      trailerBuffer = new Float32Array(buffer, index, CHUNK_TRAILER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-      index += CHUNK_TRAILER_SIZE;
+      if (!terrainBuffer) {
+        terrainBuffer = new Uint32Array(buffer, index, TERRAIN_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        index += TERRAIN_BUFFER_SIZE;
+      }
+      if (!objectBuffer) {
+        objectBuffer = new Uint32Array(buffer, index, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        index += OBJECT_BUFFER_SIZE;
+      }
+      if (!blockBuffer) {
+        blockBuffer = new Uint32Array(buffer, index, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        index += BLOCK_BUFFER_SIZE;
+      }
+      if (!lightBuffer) {
+        lightBuffer = new Float32Array(buffer, index, LIGHT_BUFFER_SIZE / Float32Array.BYTES_PER_ELEMENT);
+        index += LIGHT_BUFFER_SIZE;
+      }
+      if (!geometryBuffer) {
+        geometryBuffer = new Uint8Array(buffer, index, GEOMETRY_BUFFER_SIZE / Uint8Array.BYTES_PER_ELEMENT);
+        index += GEOMETRY_BUFFER_SIZE;
+      }
+      if (!trailerBuffer) {
+        trailerBuffer = new Uint32Array(buffer, index, CHUNK_TRAILER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        index += CHUNK_TRAILER_SIZE;
+      }
     }
 
     this.x = x;
