@@ -263,6 +263,18 @@ class Chunk {
     return freeIndex;
   }
 
+  addLightAt(index, x, y, z, v) {
+    const offset = index * LIGHT_SLOT_FIELDS;
+    this.lightBuffer[offset + 0] = x;
+    this.lightBuffer[offset + 1] = y;
+    this.lightBuffer[offset + 2] = z;
+    this.lightBuffer[offset + 3] = v;
+
+    this.dirty = true;
+
+    return index;
+  }
+
   removeLight(index) {
     const offset = index * LIGHT_SLOT_FIELDS;
 
