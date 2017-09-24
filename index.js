@@ -218,7 +218,10 @@ class Chunk {
   }
 
   clearBlock(x, y, z) {
-    this.blockBuffer[_getBlockIndex(x, y, z)] = 0;
+    const index = _getBlockIndex(x, y, z);
+    const oldN = this.blockBuffer[index];
+    this.blockBuffer[index] = 0;
+    return oldN;
   }
 
   forEachLight(fn) {
