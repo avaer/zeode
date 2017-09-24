@@ -140,6 +140,23 @@ class Chunk {
     return true;
   }
 
+  forEachBlock(fn) {
+    let index = 0;
+    for (let oy = 0; oy < (128 / 16); oy++) {
+      for (let z = 0; z < 16; z++) {
+        for (let y = 0; y < 16; y++) {
+          for (let x = 0; x < 16; x++) {
+            const n = this.blockBuffer[index];
+            if (n) {
+              fn(n, x, oy * 16 + y, z);
+            }
+            index++;
+          }
+        }
+      }
+    }
+  }
+
   addObject(n, matrix, value) {
     let freeIndex = -1;
     for (let i = 0; i < NUM_SLOTS; i++) {
@@ -413,6 +430,15 @@ class Zeode {
       const chunk = this.chunks[index];
       if (chunk) {
         chunk.forEachObject(fn);
+      }
+    }
+  }
+
+  forEachBlock(fn) {
+    for (const index in this.chunks) {
+      const chunk = this.chunks[index];
+      if (chunk) {
+        chunk.forEachBlock(fn);
       }
     }
   }
