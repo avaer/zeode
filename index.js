@@ -394,6 +394,8 @@ class Zeode {
         } else {
           byteOffset += CHUNK_SIZE;
         }
+      } else {
+        byteOffset += CHUNK_SIZE;
       }
     }
   }
