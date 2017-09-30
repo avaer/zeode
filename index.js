@@ -23,6 +23,7 @@ class Chunk {
   constructor(
     x = 0,
     z = 0,
+    i = 0,
     terrainBuffer,
     objectBuffer,
     blockBuffer,
@@ -68,6 +69,7 @@ class Chunk {
 
     this.x = x;
     this.z = z;
+    this.i = i;
     this.terrainBuffer = terrainBuffer;
     this.uint32Buffer = objectBuffer;
     this.float32Buffer = new Float32Array(objectBuffer.buffer, objectBuffer.byteOffset, objectBuffer.length);
@@ -363,18 +365,17 @@ class Zeode {
       const chunkTrailer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_TRAILER_SIZE / 4);
       byteOffset += CHUNK_TRAILER_SIZE;
 
-      this.chunks[_getChunkIndex(x, z)] = new Chunk(x, z, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, geometryBuffer, chunkTrailer);
+      this.chunks[_getChunkIndex(x, z)] = new Chunk(x, z, i, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, geometryBuffer, chunkTrailer);
     }
   }
 
   save(fn) {
-    let byteOffset = 0;
-
     for (const index in this.chunks) {
       const chunk = this.chunks[index];
 
       if (chunk) {
         if (chunk.dirty) {
+          let byteOffset = CHUNK_SIZE * chunk.index;
           fn(byteOffset, Int32Array.from([chunk.x, chunk.z]));
           byteOffset += CHUNK_HEADER_SIZE;
           fn(byteOffset, chunk.terrainBuffer);
@@ -391,11 +392,7 @@ class Zeode {
           byteOffset += CHUNK_TRAILER_SIZE;
 
           chunk.dirty = false;
-        } else {
-          byteOffset += CHUNK_SIZE;
         }
-      } else {
-        byteOffset += CHUNK_SIZE;
       }
     }
   }
@@ -404,7 +401,7 @@ class Zeode {
     return this.chunks[_getChunkIndex(x, z)];
   }
 
-  addChunk(x, z, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, geometryBuffer) {
+  addChunk(x, z, i, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, geometryBuffer) {
     const chunk = new Chunk(x, z, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, geometryBuffer);
     this.chunks[_getChunkIndex(x, z)] = chunk;
     return chunk;
