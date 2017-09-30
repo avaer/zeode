@@ -1,6 +1,6 @@
 {
   "name": "zeode",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "World chunks management",
   "main": "index.js",
   "scripts": {
