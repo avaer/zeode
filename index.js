@@ -4,8 +4,11 @@ const CHUNK_HEADER_SIZE = 2 * 4;
 const NUM_SLOTS = 64 * 64;
 const OBJECT_SLOT_FIELDS = 1 + 10 + 1;
 const OBJECT_SLOT_SIZE = OBJECT_SLOT_FIELDS * 4;
+const VEGETATION_SLOT_FIELDS = 1 + 10;
+const VEGETATION_SLOT_SIZE = VEGETATION_SLOT_FIELDS * 4;
 const TERRAIN_BUFFER_SIZE = 1 * 1024 * 1024;
 const OBJECT_BUFFER_SIZE = NUM_SLOTS * OBJECT_SLOT_SIZE;
+const VEGETATION_BUFFER_SIZE = NUM_SLOTS * VEGETATION_SLOT_SIZE;
 const BLOCK_BUFFER_SIZE = 16 * 128 * 16 * 4;
 const LIGHT_SLOT_FIELDS = 4;
 const LIGHT_SLOT_SIZE = LIGHT_SLOT_FIELDS * 4;
@@ -26,15 +29,17 @@ class Chunk {
     i = 0,
     terrainBuffer,
     objectBuffer,
+    vegetationBuffer,
     blockBuffer,
     lightBuffer,
     geometryBuffer,
     trailerBuffer
   ) {
-    if (!terrainBuffer || !objectBuffer || !blockBuffer || !lightBuffer || !geometryBuffer || !trailerBuffer) {
+    if (!terrainBuffer || !objectBuffer || !vegetationBuffer || !blockBuffer || !lightBuffer || !geometryBuffer || !trailerBuffer) {
       const buffer = new ArrayBuffer(
         (!terrainBuffer ? TERRAIN_BUFFER_SIZE : 0)+
         (!objectBuffer ? OBJECT_BUFFER_SIZE : 0) +
+        (!vegetationBuffer ? VEGETATION_BUFFER_SIZE : 0) +
         (!blockBuffer ? BLOCK_BUFFER_SIZE : 0) +
         (!lightBuffer ? LIGHT_BUFFER_SIZE : 0) +
         (!geometryBuffer ? GEOMETRY_BUFFER_SIZE : 0) +
@@ -48,6 +53,10 @@ class Chunk {
       if (!objectBuffer) {
         objectBuffer = new Uint32Array(buffer, index, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
         index += OBJECT_BUFFER_SIZE;
+      }
+      if (!vegetationBuffer) {
+        vegetationBuffer = new Uint32Array(buffer, index, VEGETATION_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        index += VEGETATION_BUFFER_SIZE;
       }
       if (!blockBuffer) {
         blockBuffer = new Uint32Array(buffer, index, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
@@ -73,6 +82,8 @@ class Chunk {
     this.terrainBuffer = terrainBuffer;
     this.uint32Buffer = objectBuffer;
     this.float32Buffer = new Float32Array(objectBuffer.buffer, objectBuffer.byteOffset, objectBuffer.length);
+    this.vegetationBuffer = vegetationBuffer;
+    this.vegetationFloat32Buffer = new Float32Array(vegetationBuffer.buffer, vegetationBuffer.byteOffset, vegetationBuffer.length);
     this.blockBuffer = blockBuffer;
     this.lightBuffer = lightBuffer;
     this.geometryBuffer = geometryBuffer;
@@ -87,6 +98,10 @@ class Chunk {
 
   getObjectBuffer() {
     return this.uint32Buffer;
+  }
+
+  getVegetationBuffer() {
+    return this.vegetationBuffer;
   }
 
   getBlockBuffer() {
@@ -226,6 +241,30 @@ class Chunk {
     } else {
       return null;
     }
+  }
+
+  addVegetation(n, matrix) {
+    let freeIndex = -1;
+    for (let i = 0; i < NUM_SLOTS; i++) {
+      if (this.vegetationBuffer[i * VEGETATION_SLOT_FIELDS] === 0) {
+        freeIndex = i;
+        break;
+      }
+    }
+
+    if (freeIndex !== -1) {
+      let offset = freeIndex * VEGETATION_SLOT_FIELDS;
+      this.vegetationBuffer[offset] = n;
+      offset++;
+      for (let i = 0; i < 10; i++) {
+        this.vegetationFloat32Buffer[offset] = matrix[i];
+        offset++;
+      }
+
+      this.dirty = true;
+    }
+
+    return freeIndex;
   }
 
   getBlock(x, y, z) {
@@ -462,6 +501,7 @@ const zeode = () => new Zeode();
 zeode.Chunk = Chunk;
 zeode.TERRAIN_BUFFER_SIZE = TERRAIN_BUFFER_SIZE;
 zeode.OBJECT_BUFFER_SIZE = OBJECT_BUFFER_SIZE;
+zeode.VEGETATION_BUFFER_SIZE = VEGETATION_BUFFER_SIZE;
 zeode.BLOCK_BUFFER_SIZE = BLOCK_BUFFER_SIZE;
 zeode.LIGHT_BUFFER_SIZE = LIGHT_BUFFER_SIZE;
 zeode.GEOMETRY_BUFFER_SIZE = GEOMETRY_BUFFER_SIZE;
