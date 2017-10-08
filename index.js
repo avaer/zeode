@@ -26,7 +26,7 @@ class Chunk {
   constructor(
     x = 0,
     z = 0,
-    i = 0,
+    index = 0,
     terrainBuffer,
     objectBuffer,
     vegetationBuffer,
@@ -45,40 +45,40 @@ class Chunk {
         (!geometryBuffer ? GEOMETRY_BUFFER_SIZE : 0) +
         (!trailerBuffer ? CHUNK_TRAILER_SIZE : 0)
       );
-      let index = 0;
+      let byteOffset = 0;
       if (!terrainBuffer) {
-        terrainBuffer = new Uint32Array(buffer, index, TERRAIN_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-        index += TERRAIN_BUFFER_SIZE;
+        terrainBuffer = new Uint32Array(buffer, byteOffset, TERRAIN_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        byteOffset += TERRAIN_BUFFER_SIZE;
       }
       if (!objectBuffer) {
-        objectBuffer = new Uint32Array(buffer, index, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-        index += OBJECT_BUFFER_SIZE;
+        objectBuffer = new Uint32Array(buffer, byteOffset, OBJECT_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        byteOffset += OBJECT_BUFFER_SIZE;
       }
       if (!vegetationBuffer) {
-        vegetationBuffer = new Uint32Array(buffer, index, VEGETATION_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-        index += VEGETATION_BUFFER_SIZE;
+        vegetationBuffer = new Uint32Array(buffer, byteOffset, VEGETATION_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        byteOffset += VEGETATION_BUFFER_SIZE;
       }
       if (!blockBuffer) {
-        blockBuffer = new Uint32Array(buffer, index, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-        index += BLOCK_BUFFER_SIZE;
+        blockBuffer = new Uint32Array(buffer, byteOffset, BLOCK_BUFFER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        byteOffset += BLOCK_BUFFER_SIZE;
       }
       if (!lightBuffer) {
-        lightBuffer = new Float32Array(buffer, index, LIGHT_BUFFER_SIZE / Float32Array.BYTES_PER_ELEMENT);
-        index += LIGHT_BUFFER_SIZE;
+        lightBuffer = new Float32Array(buffer, byteOffset, LIGHT_BUFFER_SIZE / Float32Array.BYTES_PER_ELEMENT);
+        byteOffset += LIGHT_BUFFER_SIZE;
       }
       if (!geometryBuffer) {
-        geometryBuffer = new Uint8Array(buffer, index, GEOMETRY_BUFFER_SIZE / Uint8Array.BYTES_PER_ELEMENT);
-        index += GEOMETRY_BUFFER_SIZE;
+        geometryBuffer = new Uint8Array(buffer, byteOffset, GEOMETRY_BUFFER_SIZE / Uint8Array.BYTES_PER_ELEMENT);
+        byteOffset += GEOMETRY_BUFFER_SIZE;
       }
       if (!trailerBuffer) {
-        trailerBuffer = new Uint32Array(buffer, index, CHUNK_TRAILER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
-        index += CHUNK_TRAILER_SIZE;
+        trailerBuffer = new Uint32Array(buffer, byteOffset, CHUNK_TRAILER_SIZE / Uint32Array.BYTES_PER_ELEMENT);
+        byteOffset += CHUNK_TRAILER_SIZE;
       }
     }
 
     this.x = x;
     this.z = z;
-    this.i = i;
+    this.index = index;
     this.terrainBuffer = terrainBuffer;
     this.uint32Buffer = objectBuffer;
     this.float32Buffer = new Float32Array(objectBuffer.buffer, objectBuffer.byteOffset, objectBuffer.length);
