@@ -15,7 +15,7 @@ const LIGHT_SLOT_SIZE = LIGHT_SLOT_FIELDS * 4;
 const LIGHT_BUFFER_SIZE = NUM_SLOTS * LIGHT_SLOT_SIZE;
 const TRAILER_SLOTS = 32;
 const CHUNK_TRAILER_SIZE = TRAILER_SLOTS * 4;
-const CHUNK_SIZE = CHUNK_HEADER_SIZE + TERRAIN_BUFFER_SIZE + OBJECT_BUFFER_SIZE + BLOCK_BUFFER_SIZE + LIGHT_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
+const CHUNK_SIZE = CHUNK_HEADER_SIZE + TERRAIN_BUFFER_SIZE + OBJECT_BUFFER_SIZE + VEGETATION_BUFFER_SIZE + BLOCK_BUFFER_SIZE + LIGHT_BUFFER_SIZE + CHUNK_TRAILER_SIZE;
 
 const localMatrix = Array(10);
 
@@ -383,6 +383,8 @@ class Zeode {
       byteOffset += TERRAIN_BUFFER_SIZE;
       const objectBuffer = new Uint32Array(buffer.buffer, byteOffset, OBJECT_BUFFER_SIZE / 4);
       byteOffset += OBJECT_BUFFER_SIZE;
+      const vegetationBuffer = new Uint32Array(buffer.buffer, byteOffset, OBJECT_BUFFER_SIZE / 4);
+      byteOffset += VEGETATION_BUFFER_SIZE;
       const blockBuffer = new Uint32Array(buffer.buffer, byteOffset, BLOCK_BUFFER_SIZE / 4);
       byteOffset += BLOCK_BUFFER_SIZE;
       const lightBuffer = new Float32Array(buffer.buffer, byteOffset, LIGHT_BUFFER_SIZE / 4);
@@ -390,7 +392,7 @@ class Zeode {
       const chunkTrailer = new Uint32Array(buffer.buffer, byteOffset, CHUNK_TRAILER_SIZE / 4);
       byteOffset += CHUNK_TRAILER_SIZE;
 
-      this.chunks[_getChunkIndex(x, z)] = new Chunk(x, z, i, terrainBuffer, objectBuffer, blockBuffer, lightBuffer, chunkTrailer);
+      this.chunks[_getChunkIndex(x, z)] = new Chunk(x, z, i, terrainBuffer, objectBuffer, vegetationBuffer, blockBuffer, lightBuffer, chunkTrailer);
     }
   }
 
@@ -407,6 +409,8 @@ class Zeode {
           byteOffset += TERRAIN_BUFFER_SIZE;
           fn(byteOffset, chunk.uint32Buffer);
           byteOffset += OBJECT_BUFFER_SIZE;
+          fn(byteOffset, chunk.vegetationBuffer);
+          byteOffset += VEGETATION_BUFFER_SIZE;
           fn(byteOffset, chunk.blockBuffer);
           byteOffset += BLOCK_BUFFER_SIZE;
           fn(byteOffset, chunk.lightBuffer);
